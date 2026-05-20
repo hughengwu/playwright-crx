@@ -5,6 +5,10 @@ on:
     types: [published]
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to upload to (e.g. v0.15.1)'
+        required: true
 
 jobs:
   release:
@@ -22,6 +26,6 @@ jobs:
           NODE_OPTIONS: "--max_old_space_size=4096"
       - run: cd examples/recorder-crx/dist && zip -r ../recorder-crx.zip .
       - name: Upload extension to GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: examples/recorder-crx/recorder-crx.zip
+        run: gh release upload ${{ github.event.release.tag_name || inputs.tag }} examples/recorder-crx/recorder-crx.zip --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
